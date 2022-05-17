@@ -46,7 +46,11 @@ RN_FISCAL %>%
 
 StyleTheme <-  theme_minimal() +
   theme(panel.grid.minor = element_blank(),
-        axis.title.x  = element_blank()) 
+        axis.title.x  = element_blank(),
+        legend.box      = "horizontal",
+        legend.position = "bottom",
+        axis.text.x = element_text(size = 8, color = "Black"),
+        axis.text.y = element_text(size = 8, color = "black")) 
 
 #Conteúdo 1
 
@@ -57,7 +61,9 @@ Impostos_Totais %>%
   scale_y_continuous(labels = comma_format(big.mark = ".",
                                            decimal.mark = ",")) +
   StyleTheme +
-  ggtitle("Arrecadação de Impostos do RN e Suas Evoluções (1997 - 2022)") + 
+   labs(title = "Arrecadação de Impostos do RN e Suas Evoluções (1997 - 2022)",
+    subtitle = "(Valores Nominais)",
+    caption = "Observatório Conjuntura Econômica do RN \n NEAQ-DEPEC/UFRN \n Fonte: Confaz (2022)", position = c("left", "top"))+
   scale_colour_manual(values = c("#32373b", "#62b851",
                                  "#009fb7", "#b20d30",
                                  "#f4b942"))
