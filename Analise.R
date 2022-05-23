@@ -10,6 +10,7 @@ library(formattable)
 library(reactable)
 library(esquisse)
 library(reactablefmtr)
+library(ipeadatar)
 
 X20220406_sigdef <- read_excel("20220406_sigdef.xls", 
                                sheet = "arrecadacao")
@@ -49,6 +50,16 @@ RN_FISCAL %>%
                                       "IPVA",
                                       "ITCD",
                                       "OUTROS")))-> Impostos_Totais
+
+
+###### DEFLACIONANDO #####
+
+ipeadata("PRECOS12_IPCA12")  %>% 
+  filter(year(date) > 1999) -> deflacionador
+
+
+
+##### GRÁFICOS ####
 
 
 StyleTheme <-  theme_minimal() +
@@ -174,27 +185,7 @@ RN_FISCAL %>%
 
 
 
-# RN_FISCAL %>% 
-#   select(ESTADO,
-#          Período,
-#          `TOTAL DA ARRECADAÇÃO DO ICMS`,
-#          IPVA,
-#          ITCD,
-#          `TOTAL GERAL DA RECEITA TRIBUTÁRIA`) %>%
-#   rename(ICMS = `TOTAL DA ARRECADAÇÃO DO ICMS`) %>% 
-#   filter(Período > "dez 2018") %>% 
-#   mutate(Período = as.yearqtr(Período, format = "%y Q%q")) %>% 
-#   group_by(Período) %>% 
-#   summarise(across(everything()[-1], sum)) %>% 
-#   mutate(across(ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`, ~ .x/.x[1])) %>% 
-#   pivot_longer(cols = ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`,
-#                names_to = "Tributos", values_to = "Montante") %>% 
-#   mutate(Tributos = factor(Tributos,
-#                            levels = c("TOTAL GERAL DA RECEITA TRIBUTÁRIA",
-#                                       "ICMS",
-#                                       "IPVA",
-#                                       "ITCD",
-#                                       "OUTROS"))) -> num_indice_arrecadacao
+
 
 ggplot(num_indice_arrecadacao, aes(x = Período,y = Montante, fill = Tributos, label = percent(Montante))) +
   geom_bar(stat = "identity", position = "dodge") +
