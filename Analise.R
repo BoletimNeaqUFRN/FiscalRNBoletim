@@ -1,6 +1,5 @@
 library(readxl)
-# library(tidyverse) não precisa carregar, vai carregar muito pacote
-library(dplyr) ## fica redundante importar o tidyverse junto com o fplyr
+library(tidyverse)
 library(zoo)
 library(ggplot2)
 library(scales)
@@ -184,7 +183,27 @@ RN_FISCAL %>%
   mutate(across(ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`, pervar)) -> variacao_percentual_arrecadacao
 
 
-
+RN_FISCAL %>%
+  select(ESTADO,
+         Período,
+         `TOTAL DA ARRECADAÇÃO DO ICMS`,
+         IPVA,
+         ITCD,
+         `TOTAL GERAL DA RECEITA TRIBUTÁRIA`) %>%
+  rename(ICMS = `TOTAL DA ARRECADAÇÃO DO ICMS`) %>%
+  filter(Período > "dez 2018") %>%
+  mutate(Período = as.yearqtr(Período, format = "%y Q%q")) %>%
+  group_by(Período) %>%
+  summarise(across(everything()[-1], sum)) %>%
+  mutate(across(ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`, ~ .x/.x[1])) %>%
+  pivot_longer(cols = ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`,
+               names_to = "Tributos", values_to = "Montante") %>%
+  mutate(Tributos = factor(Tributos,
+                           levels = c("TOTAL GERAL DA RECEITA TRIBUTÁRIA",
+                                      "ICMS",
+                                      "IPVA",
+                                      "ITCD",
+                                      "OUTROS"))) -> num_indice_arrecadacao
 
 
 ggplot(num_indice_arrecadacao, aes(x = Período,y = Montante, fill = Tributos, label = percent(Montante))) +

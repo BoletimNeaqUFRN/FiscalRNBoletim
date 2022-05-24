@@ -178,19 +178,6 @@ pervar <- function(x) { #função de variação percentual tem que desaparecer, 
 }
 
 sigdef %>% 
-  mutate(Período = as.yearmon(paste(ANO, MÊS, sep= "-"))) %>% 
-  select(ESTADO,
-         Período,
-         `TOTAL DA ARRECADAÇÃO DO ICMS`,
-         IPVA,
-         ITCD,
-         `TOTAL GERAL DA RECEITA TRIBUTÁRIA`) %>%
-  rename(ICMS = `TOTAL DA ARRECADAÇÃO DO ICMS`) %>% 
-  filter(Período > "nov 2017") %>% 
-  mutate(across(ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`, pervar)) -> variacao_percentual_arrecadacao
-
-
-sigdef %>% 
   mutate(Período = as.yearmon(paste(ANO, MÊS, sep= "-"))) %>%
   select(ESTADO,
          Período,
