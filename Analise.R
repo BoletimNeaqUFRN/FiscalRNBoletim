@@ -51,10 +51,13 @@ RN_FISCAL %>%
                                       "OUTROS")))-> Impostos_Totais
 
 
-###### DEFLACIONANDO #####
+###### DEFLACIONADOR #####
 
 ipeadata("PRECOS12_IPCA12")  %>% 
-  filter(year(date) > 1999) -> deflacionador
+  filter(year(date) > 1999) %>% 
+  mutate(Período = as.yearmon(date),
+         value = value/value[1]) %>% 
+  select(Período, value)  -> deflacionador
 
 
 
@@ -69,7 +72,7 @@ StyleTheme <-  theme_minimal() +
         axis.text.x = element_text(size = 8, color = "Black"),
         axis.text.y = element_text(size = 8, color = "black")) 
 
-#Conteúdo 1
+# Evolução Receita Nominal 1
 
 
 Impostos_Totais %>%
@@ -85,7 +88,7 @@ Impostos_Totais %>%
                                  "#009fb7", "#b20d30",
                                  "#f4b942"))
 
-#Conteúdo 2
+# Participação dos Impostos na Arrecadação do Estado
   
 
 Impostos_Totais %>%
@@ -144,7 +147,7 @@ Impostos_Totais %>%
   google_font("Roboto")
 
 
-#Conteúdo 3
+# VArrecadaçõa por Setor 
 
 RN_FISCAL %>% 
   filter(Período > "dez 2020") %>% 
@@ -164,6 +167,11 @@ SetoresI %>%
   scale_y_continuous(labels = comma_format(big.mark = ".",
                                            decimal.mark = ",")) +
   ggtitle("Valor arrecadado do ICMS por setores")
+
+
+
+
+
 
 #Conteúdo 4
 
@@ -235,7 +243,7 @@ ggplot(num_indice_arrecadacao, aes(x = Período,y = Montante, fill = Tributos, l
            vjust = 1, hjust = -.07,
            fontface = "bold",size = 3.7) +
   labs(y = "Variação Percentual",
-       title = "Variação Percentual dos Tributos do RN (2019 - 2022)",
+       title = "Variação Percentual Nominal dos Tributos do RN (2019 - 2022)",
        caption = "Observatório Conjuntura Econômica do RN \n NEAQ-DEPEC/UFRN \n Fonte: Confaz (2022)", position = c("left", "top"))
 
   
@@ -244,5 +252,71 @@ ggplot(num_indice_arrecadacao, aes(x = Período,y = Montante, fill = Tributos, l
 #   as.vector()  -> teste      
 
 # Comentando pois podemos automatizar os gráficos utilizando certos macetes
+
+##### RECEITA REAL #####
+
+Impostos_Totais %>% 
+  left_join(., deflacionador) %>% 
+  mutate(`Valor Real` = Montante/value) %>% 
+  ggplot(.,aes(x= Período, y = `Valor Real`, color= Tributos)) +
+  geom_line(size = 1.1) +
+  scale_y_continuous(labels = comma_format(big.mark = ".",
+                                           decimal.mark = ",")) +
+  StyleTheme +
+  labs(title = "Arrecadação de Impostos do RN e Suas Evoluções (1997 - 2022)",
+       subtitle = "(Valores Reais)",
+       caption = "Observatório Conjuntura Econômica do RN \n NEAQ-DEPEC/UFRN \n Fonte: Confaz (2022)", position = c("left", "top"))+
+  scale_colour_manual(values = c("#32373b", "#62b851",
+                                 "#009fb7", "#b20d30",
+                                 "#f4b942"))
+  
+  #####  Variação Real 2019-2022 #####
+  
+  RN_FISCAL %>%
+    select(ESTADO,
+           Período,
+           `TOTAL DA ARRECADAÇÃO DO ICMS`,
+           IPVA,
+           ITCD,
+           `TOTAL GERAL DA RECEITA TRIBUTÁRIA`) %>%
+    rename(ICMS = `TOTAL DA ARRECADAÇÃO DO ICMS`) %>%
+    left_join(., deflacionador) %>% 
+    filter(Período > "dez 2018") %>%
+    mutate(value = value/value[1]) %>% 
+    mutate(ICMS = ICMS/value,
+           IPVA = IPVA/value,
+           ITCD = ITCD/value,
+           `TOTAL GERAL DA RECEITA TRIBUTÁRIA` = `TOTAL GERAL DA RECEITA TRIBUTÁRIA`/value) %>% 
+    mutate(Período = as.yearqtr(Período, format = "%y Q%q")) %>%
+    group_by(Período) %>%
+    summarise(across(everything()[-c(1,6)], sum)) %>%
+    mutate(across(ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`, ~ .x/.x[1])) %>%
+    pivot_longer(cols = ICMS:`TOTAL GERAL DA RECEITA TRIBUTÁRIA`,
+                 names_to = "Tributos", values_to = "Montante") %>%
+    mutate(Tributos = factor(Tributos,
+                             levels = c("TOTAL GERAL DA RECEITA TRIBUTÁRIA",
+                                        "ICMS",
+                                        "IPVA",
+                                        "ITCD",
+                                        "OUTROS"))) %>% 
+    ggplot(., aes(x = Período,y = Montante, fill = Tributos, label = percent(Montante))) +
+    geom_bar(stat = "identity", position = "dodge") +
+    StyleTheme +
+    theme(axis.text.x = element_text(angle = 22.5)) +
+    scale_x_yearqtr(format = "%YQ%q") +
+    theme(axis.text.x=element_text(angle=45, hjust=1))+
+    geom_hline(yintercept = 1, linetype = "dashed", color = "grey") +
+    scale_fill_manual(values = c("#32373b",
+                                 "#62b851",
+                                 "#009fb7", "#b20d30",
+                                 "#f4b942")) +
+    scale_y_continuous(labels = scales::percent) +
+    labs(y = "Variação Percentual",
+         title = "Variação Percentual Real dos Tributos do RN (2019 - 2022)",
+         caption = "Observatório Conjuntura Econômica do RN \n NEAQ-DEPEC/UFRN \n Fonte: Confaz (2022)", position = c("left", "top"))
+  
+  
+  
+  
 
 
