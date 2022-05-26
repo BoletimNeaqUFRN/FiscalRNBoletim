@@ -72,7 +72,7 @@ StyleTheme <-  theme_minimal() +
         axis.text.x = element_text(size = 8, color = "Black"),
         axis.text.y = element_text(size = 8, color = "black")) 
 
-# Evolução Receita Nominal 1
+###### Evolução Receita Nominal 1 ####
 
 
 Impostos_Totais %>%
@@ -88,7 +88,7 @@ Impostos_Totais %>%
                                  "#009fb7", "#b20d30",
                                  "#f4b942"))
 
-# Participação dos Impostos na Arrecadação do Estado
+##### Participação dos Impostos na Arrecadação do Estado  #####
   
 
 Impostos_Totais %>%
@@ -147,25 +147,31 @@ Impostos_Totais %>%
   google_font("Roboto")
 
 
-# VArrecadaçõa por Setor 
+##### Arrecadação por Setor  #####
 
 RN_FISCAL %>% 
-  filter(Período > "dez 2020") %>% 
-  select(Período:`1.3 - TERCIÁRIO`, `TOTAL DA ARRECADAÇÃO DO ICMS`) -> SetoresI
+  filter(Período > "dez 2018") %>% 
+  select(Período:`1.3 - TERCIÁRIO`, `2.1 - ENERGIA ELÉTRICA`, `2.2 - PETRÓLEO, COMBUSTÍVEIS E LUBRIFICANTES`)  -> Setores
 
-SetoresI %>% 
-  pivot_longer(cols = -c(Período, `TOTAL DA ARRECADAÇÃO DO ICMS`), 
+Setores %>% 
+  mutate(Período = as.yearqtr(Período, format = "%y Q%q")) %>%
+  group_by(Período) %>%
+  summarise(across(everything(), sum)) %>% 
+  pivot_longer(cols = -Período, 
                names_to = "Setores",
                values_to = "Montante") %>% 
-  mutate(Setores = substring(Setores, first = 7)) %>% 
+  mutate(Setores = substring(Setores, first = 7),
+         Montante = Montante/1000000) %>%
   ggplot(aes(Período, Montante, fill = Setores)) +
   geom_col(position = "stack") +
   StyleTheme +
   scale_fill_manual(values = c("#62b851", "#32373b",
                                  "#009fb7", "#b20d30",
-                                 "#f4b942")) +
+                                 "#f4b942"))  +
   scale_y_continuous(labels = comma_format(big.mark = ".",
                                            decimal.mark = ",")) +
+  scale_x_yearqtr(format = "%YQ%q") +
+  theme(axis.text.x = element_text(angle = 90))
   ggtitle("Valor arrecadado do ICMS por setores")
 
 
