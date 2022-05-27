@@ -197,8 +197,8 @@ Setores1%>%
                                      background = "#7290ba",
                                      color  = "#f5f5f5")),
             columns = list(
-              Ano = colDef(align = "left"),
-              Trimestre=colDef(align = "left"),
+              Ano = colDef(align = "left", maxWidth = 90),
+              Trimestre=colDef(align = "left", maxWidth = 90),
               PRIMÁRIO = colDef(
                 cell = data_bars(., 
                                  number_fmt = formattable::percent,
