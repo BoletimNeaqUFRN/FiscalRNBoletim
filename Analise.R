@@ -237,7 +237,7 @@ Setores1%>%
               bordered = T,
               striped = T ,
               pagination = F
-            )) %>% 
+          )) %>% 
   google_font("Roboto")
 
 
