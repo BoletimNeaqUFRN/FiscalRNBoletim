@@ -72,21 +72,36 @@ StyleTheme <-  theme_minimal() +
         axis.text.x = element_text(size = 8, color = "Black"),
         axis.text.y = element_text(size = 8, color = "black")) 
 
+
+destaque<- geom_rect(xmin=as.yearmon("jan 2020"),
+                     xmax=as.yearmon("dez 2020"),
+                     ymin=-Inf, 
+                     ymax=Inf,
+                     fill="lightgrey", 
+                     alpha=0.03)
+
 ###### Evolução Receita Nominal 1 ####
 
 
 Impostos_Totais %>%
+  mutate(Montante=Montante*1e-6) %>% 
   ggplot(.,aes(x= Período, y = Montante, color= Tributos)) +
+  destaque+
   geom_line(size = 1.1) +
   scale_y_continuous(labels = comma_format(big.mark = ".",
                                            decimal.mark = ",")) +
+  scale_x_yearmon(format="%b%Y", 
+                  breaks = seq(from = min(Impostos_Totais$Período),
+                               to = max(Impostos_Totais$Período),
+                               by = 0.5))+
   StyleTheme +
-   labs(title = "Arrecadação de Impostos do RN e Suas Evoluções (1997 - 2022)",
-    subtitle = "(Valores Nominais)",
-    caption = "Observatório Conjuntura Econômica do RN \n NEAQ-DEPEC/UFRN \n Fonte: Confaz (2022)", position = c("left", "top"))+
+  labs(title = "Arrecadação de Impostos do RN e Suas Evoluções (1997 - 2022)",
+       subtitle = "(Valores Nominais - Milhões de reais)",
+       caption = "Observatório Conjuntura Econômica do RN \n NEAQ-DEPEC/UFRN \n Fonte: Confaz (2022)", position = c("left", "top"))+
   scale_colour_manual(values = c("#32373b", "#62b851",
                                  "#009fb7", "#b20d30",
-                                 "#f4b942"))
+                                 "#f4b942"))+
+  theme(axis.text.x = element_text(angle = 90))
 
 ##### Participação dos Impostos na Arrecadação do Estado  #####
   
@@ -176,8 +191,8 @@ Setores1%>%
   scale_y_continuous(labels = comma_format(big.mark = ".",
                                            decimal.mark = ",")) +
   scale_x_yearqtr(format = "%Y\nQ%q", 
-                  breaks = seq(from = min(Setores$Período),
-                               to = max(Setores$Período),
+                  breaks = seq(from = min(Setores1$Período),
+                               to = max(Setores1$Período),
                                by = 0.2)) +
   theme(axis.text.x = element_text(angle = 0))
 ggtitle("Valor arrecadado do ICMS por setores")
