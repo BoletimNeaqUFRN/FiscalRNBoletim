@@ -101,7 +101,7 @@ Impostos_Totais %>%
   scale_colour_manual(values = c("#32373b", "#62b851",
                                  "#009fb7", "#b20d30",
                                  "#f4b942"))+
-  theme(axis.text.x = element_text(angle = 90))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.4))
 
 ##### Participação dos Impostos na Arrecadação do Estado  #####
   
@@ -169,9 +169,7 @@ Impostos_Totais %>%
 
 RN_FISCAL %>% 
   filter(Período > "dez 2018") %>% 
-  select(Período:`1.3 - TERCIÁRIO`, `2.1 - ENERGIA ELÉTRICA`, `2.2 - PETRÓLEO, COMBUSTÍVEIS E LUBRIFICANTES`)  -> Setores
-
-Setores %>% 
+  select(Período:`1.3 - TERCIÁRIO`, `2.1 - ENERGIA ELÉTRICA`, `2.2 - PETRÓLEO, COMBUSTÍVEIS E LUBRIFICANTES`) %>% 
   mutate(Período = as.yearqtr(Período, format = "%y Q%q")) %>%
   group_by(Período) %>%
   summarise(across(everything(), sum))%>% 
@@ -182,10 +180,11 @@ Setores %>%
          Montante = Montante/1000000)-> Setores1
 
 Setores1%>%
-  ggplot(aes(Período, Montante, fill = Setores)) +
-  geom_col(position = "stack") +
+  ggplot(aes(Período, Montante, color = Setores)) +
+  geom_line(size = 1.3) +
+  geom_point(size = 3) +
   StyleTheme +
-  scale_fill_manual(values = c("#62b851", "#32373b",
+  scale_color_manual(values = c("#62b851", "#32373b",
                                "#009fb7", "#b20d30",
                                "#f4b942"))  +
   scale_y_continuous(labels = comma_format(big.mark = ".",
@@ -194,7 +193,7 @@ Setores1%>%
                   breaks = seq(from = min(Setores1$Período),
                                to = max(Setores1$Período),
                                by = 0.2)) +
-  theme(axis.text.x = element_text(angle = 0))
+  theme(axis.text.x = element_text(angle = 0)) +
 ggtitle("Valor arrecadado do ICMS por setores")
 
 
