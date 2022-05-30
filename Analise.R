@@ -118,32 +118,28 @@ Impostos_Totais %>%
                                  number_fmt = formattable::percent,
                                  text_position = "outside-base",
                                  force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)
+                                 fill_color = "#7290ba")
               ),
               IPVA = colDef(
                 cell = data_bars(., 
                                  number_fmt = formattable::percent,
                                  text_position = "outside-base",
                                  force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)
+                                 fill_color = "#7290ba")
               ),
               ITCD = colDef(
                 cell = data_bars(., 
                                  number_fmt = formattable::percent,
                                  text_position = "outside-base",
                                  force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)
+                                 fill_color = "#7290ba")
               ),
               OUTROS = colDef(
                 cell = data_bars(., 
                                  number_fmt = formattable::percent,
                                  text_position = "outside-base",
                                  force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)
+                                 fill_color = "#7290ba")
   )),
   bordered = T,
   striped = T
@@ -160,88 +156,24 @@ RN_FISCAL %>%
 Setores %>% 
   mutate(Período = as.yearqtr(Período, format = "%y Q%q")) %>%
   group_by(Período) %>%
-  summarise(across(everything(), sum))%>% 
+  summarise(across(everything(), sum)) %>% 
   pivot_longer(cols = -Período, 
                names_to = "Setores",
                values_to = "Montante") %>% 
   mutate(Setores = substring(Setores, first = 7),
-         Montante = Montante/1000000)-> Setores1
-
-Setores1%>%
+         Montante = Montante/1000000) %>%
   ggplot(aes(Período, Montante, fill = Setores)) +
   geom_col(position = "stack") +
   StyleTheme +
   scale_fill_manual(values = c("#62b851", "#32373b",
-                               "#009fb7", "#b20d30",
-                               "#f4b942"))  +
+                                 "#009fb7", "#b20d30",
+                                 "#f4b942"))  +
   scale_y_continuous(labels = comma_format(big.mark = ".",
                                            decimal.mark = ",")) +
-  scale_x_yearqtr(format = "%Y\nQ%q", 
-                  breaks = seq(from = min(Setores1$Período),
-                               to = max(Setores1$Período),
-                               by = 0.2)) +
-  theme(axis.text.x = element_text(angle = 0))
-ggtitle("Valor arrecadado do ICMS por setores")
+  scale_x_yearqtr(format = "%YQ%q") +
+  theme(axis.text.x = element_text(angle = 90))
+  ggtitle("Valor arrecadado do ICMS por setores")
 
-
-a<-Setores1%>%
-  group_by(Período) %>% 
-  mutate(Total=sum(Montante),
-         prop=round((Montante/Total), 2)) %>% 
-  separate(col=Período,into = c("Ano","Trimestre"), sep =" ")%>% 
-  select(Ano, Trimestre, Setores, prop)
-
-a$Trimestre=str_replace_all(a$Trimestre, "Q", "T")
-
-a%>% 
-  pivot_wider(names_from = Setores, values_from = prop)   %>% 
-  reactable(defaultColDef = colDef(headerClass = "header", align = "center",
-                                   headerStyle = list(
-                                     background = "#7290ba",
-                                     color  = "#f5f5f5")),
-            columns = list(
-              Ano = colDef(align = "left"),
-              Trimestre=colDef(align = "left"),
-              PRIM?RIO = colDef(
-                cell = data_bars(., 
-                                 number_fmt = formattable::percent,
-                                 text_position = "outside-base",
-                                 force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)),                
-              SECUND?RIO = colDef(
-                cell = data_bars(., 
-                                 number_fmt = formattable::percent,
-                                 text_position = "outside-base",
-                                 force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)),
-              TERCIÁRIO = colDef(
-                cell = data_bars(., 
-                                 number_fmt = formattable::percent,
-                                 text_position = "outside-base",
-                                 force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)),
-              `ENERGIA ELÉTRICA`= colDef(
-                cell = data_bars(., 
-                                 number_fmt = formattable::percent,
-                                 text_position = "outside-base",
-                                 force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)),
-              `PETRÓLEO, COMBUSTÍVEIS E LUBRIFICANTES`= colDef(
-                cell = data_bars(., 
-                                 number_fmt = formattable::percent,
-                                 text_position = "outside-base",
-                                 force_outside = c(0,0.4),
-                                 fill_color = "#7290ba",
-                                 max_value=1)),
-              bordered = T,
-              striped = T ,
-              pagination = F
-            )) %>% 
-  google_font("Roboto")
 
 
 
